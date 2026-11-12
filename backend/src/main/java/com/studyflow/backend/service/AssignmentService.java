@@ -41,6 +41,9 @@ public class AssignmentService {
 
         assignment.setCompleted(request.completed());
 
+        // Save the assignment deadline
+        assignment.setDueDate(request.dueDate());
+
         return toResponse(repository.save(assignment));
     }
 
@@ -53,6 +56,9 @@ public class AssignmentService {
         assignment.setTitle(request.title());
         assignment.setCourse(request.course());
         assignment.setCompleted(request.completed());
+
+        // Update the assignment deadline
+        assignment.setDueDate(request.dueDate());
 
         return toResponse(repository.save(assignment));
     }
@@ -75,7 +81,8 @@ public class AssignmentService {
                 assignment.getId(),
                 assignment.getTitle(),
                 assignment.getCourse(),
-                assignment.isCompleted()
+                assignment.isCompleted(),
+                assignment.getDueDate()
         );
     }
 }

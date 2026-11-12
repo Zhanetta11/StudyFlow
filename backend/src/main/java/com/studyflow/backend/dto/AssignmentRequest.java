@@ -2,6 +2,7 @@ package com.studyflow.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 
 public record AssignmentRequest(
         @NotBlank(message = "Title is required")
@@ -12,6 +13,8 @@ public record AssignmentRequest(
         @Size(max = 255)
         String course,
 
-        boolean completed
+        boolean completed,
+
+        LocalDate dueDate
 ) {
 }

@@ -1,5 +1,6 @@
 package com.studyflow.backend.entity;
 
+import java.time.LocalDate;
 import jakarta.persistence.*;
 
 @Entity
@@ -19,12 +20,26 @@ public class Assignment {
     @Column(nullable = false)
     private boolean completed = false;
 
+    // Optional assignment deadline
+    @Column(name = "due_date")
+    private LocalDate dueDate;
+
     public Assignment() {
     }
 
     public Assignment(String title, String course) {
         this.title = title;
         this.course = course;
+    }
+
+    public Assignment(
+            String title,
+            String course,
+            LocalDate dueDate
+    ) {
+        this.title = title;
+        this.course = course;
+        this.dueDate = dueDate;
     }
 
     public Long getId() {
@@ -53,5 +68,13 @@ public class Assignment {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
     }
 }
