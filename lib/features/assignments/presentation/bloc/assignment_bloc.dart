@@ -1,11 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/assignment.dart';
+import '../../data/repositories/assignment_repository.dart';
 import 'assignment_event.dart';
 import 'assignment_state.dart';
 
 class AssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
-  AssignmentBloc() : super(const AssignmentInitial()) {
+  final AssignmentRepository repository;
+
+  AssignmentBloc({required this.repository})
+    : super(const AssignmentInitial()) {
     on<LoadAssignments>(_onLoad);
     on<AddAssignment>(_onAdd);
     on<ToggleAssignment>(_onToggle);
@@ -14,15 +18,31 @@ class AssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
 
   final List<Assignment> _assignments = [];
 
-  int _nextId = 1;
-
-  void _onLoad(LoadAssignments event, Emitter<AssignmentState> emit) {
+  // GET - Load assignments from backend
+  Future<void> _onLoad(
+    LoadAssignments event,
+    Emitter<AssignmentState> emit,
+  ) async {
     emit(const AssignmentLoading());
 
-    emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+    try {
+      final assignments = await repository.getAssignments();
+
+      _assignments
+        ..clear()
+        ..addAll(assignments);
+
+      emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+    } catch (e) {
+      emit(AssignmentError('Failed to load assignments: $e'));
+    }
   }
 
-  void _onAdd(AddAssignment event, Emitter<AssignmentState> emit) {
+  // POST - Create assignment in database
+  Future<void> _onAdd(
+    AddAssignment event,
+    Emitter<AssignmentState> emit,
+  ) async {
     final title = event.title.trim();
     final course = event.course.trim();
 
@@ -32,14 +52,26 @@ class AssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
       return;
     }
 
-    _assignments.add(
-      Assignment(id: (_nextId++).toString(), title: title, course: course),
-    );
+    try {
+      final assignment = await repository.createAssignment(
+        title: title,
+        course: course,
+      );
 
-    emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+      _assignments.add(assignment);
+
+      emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+    } catch (e) {
+      emit(AssignmentError('Failed to add assignment: $e'));
+      emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+    }
   }
 
-  void _onToggle(ToggleAssignment event, Emitter<AssignmentState> emit) {
+  // PUT - Toggle assignment completion status
+  Future<void> _onToggle(
+    ToggleAssignment event,
+    Emitter<AssignmentState> emit,
+  ) async {
     final index = _assignments.indexWhere(
       (assignment) => assignment.id == event.id,
     );
@@ -48,14 +80,34 @@ class AssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
 
     final current = _assignments[index];
 
-    _assignments[index] = current.copyWith(isCompleted: !current.isCompleted);
+    try {
+      final updated = await repository.updateAssignment(
+        current.copyWith(isCompleted: !current.isCompleted),
+      );
 
-    emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+      _assignments[index] = updated;
+
+      emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+    } catch (e) {
+      emit(AssignmentError('Failed to update assignment: $e'));
+      emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+    }
   }
 
-  void _onDelete(DeleteAssignment event, Emitter<AssignmentState> emit) {
-    _assignments.removeWhere((assignment) => assignment.id == event.id);
+  // DELETE - Remove assignment from database
+  Future<void> _onDelete(
+    DeleteAssignment event,
+    Emitter<AssignmentState> emit,
+  ) async {
+    try {
+      await repository.deleteAssignment(event.id);
 
-    emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+      _assignments.removeWhere((assignment) => assignment.id == event.id);
+
+      emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+    } catch (e) {
+      emit(AssignmentError('Failed to delete assignment: $e'));
+      emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+    }
   }
 }

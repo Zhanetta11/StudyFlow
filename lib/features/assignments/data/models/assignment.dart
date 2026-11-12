@@ -22,6 +22,15 @@ class Assignment extends Equatable {
     );
   }
 
+  factory Assignment.fromJson(Map<String, dynamic> json) {
+    return Assignment(
+      id: json['id'].toString(),
+      title: json['title'] as String,
+      course: json['course'] as String,
+      isCompleted: json['completed'] as bool,
+    );
+  }
+
   @override
   List<Object?> get props => [id, title, course, isCompleted];
 }
