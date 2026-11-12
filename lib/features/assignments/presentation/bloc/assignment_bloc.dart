@@ -38,7 +38,7 @@ class AssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
     }
   }
 
-  // POST - Create assignment in database
+  // POST - Create assignment with optional deadline
   Future<void> _onAdd(
     AddAssignment event,
     Emitter<AssignmentState> emit,
@@ -56,6 +56,7 @@ class AssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
       final assignment = await repository.createAssignment(
         title: title,
         course: course,
+        dueDate: event.dueDate,
       );
 
       _assignments.add(assignment);

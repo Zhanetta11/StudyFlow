@@ -14,11 +14,16 @@ class LoadAssignments extends AssignmentEvent {
 class AddAssignment extends AssignmentEvent {
   final String title;
   final String course;
+  final DateTime? dueDate;
 
-  const AddAssignment({required this.title, required this.course});
+  const AddAssignment({
+    required this.title,
+    required this.course,
+    this.dueDate,
+  });
 
   @override
-  List<Object?> get props => [title, course];
+  List<Object?> get props => [title, course, dueDate];
 }
 
 class ToggleAssignment extends AssignmentEvent {

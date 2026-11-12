@@ -17,6 +17,17 @@ class AssignmentRepository {
             ),
           );
 
+  // Convert DateTime to yyyy-MM-dd for Spring Boot.
+  String? _formatDate(DateTime? date) {
+    if (date == null) return null;
+
+    final year = date.year.toString().padLeft(4, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+
+    return '$year-$month-$day';
+  }
+
   // GET - Load all assignments
   Future<List<Assignment>> getAssignments() async {
     final response = await _dio.get('/assignments');
@@ -32,10 +43,16 @@ class AssignmentRepository {
   Future<Assignment> createAssignment({
     required String title,
     required String course,
+    DateTime? dueDate,
   }) async {
     final response = await _dio.post(
       '/assignments',
-      data: {'title': title, 'course': course, 'completed': false},
+      data: {
+        'title': title,
+        'course': course,
+        'completed': false,
+        'dueDate': _formatDate(dueDate),
+      },
     );
 
     return Assignment.fromJson(response.data as Map<String, dynamic>);
@@ -49,6 +66,7 @@ class AssignmentRepository {
         'title': assignment.title,
         'course': assignment.course,
         'completed': assignment.isCompleted,
+        'dueDate': _formatDate(assignment.dueDate),
       },
     );
 
