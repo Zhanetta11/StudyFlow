@@ -1,21 +1,15 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:studyflow/app.dart';
 
 void main() {
-  testWidgets('StudyFlow welcome screen test', (
-      WidgetTester tester,
-      ) async {
+  testWidgets('Home dashboard displays study information', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const StudyFlowApp());
 
-    expect(
-      find.text('Welcome to StudyFlow!'),
-      findsOneWidget,
-    );
-
-    expect(
-      find.byType(MaterialApp),
-      findsOneWidget,
-    );
+    expect(find.text('StudyFlow'), findsOneWidget);
+    expect(find.text('Hello, Student! 👋'), findsOneWidget);
+    expect(find.text('Your Study Progress'), findsOneWidget);
+    expect(find.text('75%'), findsOneWidget);
   });
 }

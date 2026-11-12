@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
+import 'features/home/presentation/pages/home_screen.dart';
 
 class StudyFlowApp extends StatelessWidget {
   const StudyFlowApp({super.key});
@@ -11,17 +12,7 @@ class StudyFlowApp extends StatelessWidget {
       title: 'StudyFlow',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            'Welcome to StudyFlow!',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
+      home: const HomeScreen(),
     );
   }
 }
