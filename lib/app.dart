@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
-import 'features/home/presentation/pages/home_screen.dart';
+import 'shared/widgets/main_navigation.dart';
 
 class StudyFlowApp extends StatelessWidget {
   const StudyFlowApp({super.key});
@@ -12,7 +12,7 @@ class StudyFlowApp extends StatelessWidget {
       title: 'StudyFlow',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const HomeScreen(),
+      home: const MainNavigation(),
     );
   }
 }
