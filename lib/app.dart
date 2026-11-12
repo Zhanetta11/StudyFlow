@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/theme/app_theme.dart';
+import 'features/assignments/presentation/bloc/assignment_bloc.dart';
+import 'features/assignments/presentation/bloc/assignment_event.dart';
 import 'shared/widgets/main_navigation.dart';
 
 class StudyFlowApp extends StatelessWidget {
@@ -8,11 +11,14 @@ class StudyFlowApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'StudyFlow',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const MainNavigation(),
+    return BlocProvider(
+      create: (_) => AssignmentBloc()..add(const LoadAssignments()),
+      child: MaterialApp(
+        title: 'StudyFlow',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        home: const MainNavigation(),
+      ),
     );
   }
 }
