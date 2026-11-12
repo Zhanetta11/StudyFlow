@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../bloc/assignment_bloc.dart';
 import '../bloc/assignment_event.dart';
 import '../bloc/assignment_state.dart';
+import '../../data/models/assignment.dart';
 
 class AssignmentsScreen extends StatelessWidget {
   const AssignmentsScreen({super.key});
@@ -161,6 +162,132 @@ class AssignmentsScreen extends StatelessWidget {
     );
   }
 
+  void _showEditDialog(BuildContext context, Assignment assignment) {
+    final bloc = context.read<AssignmentBloc>();
+
+    String title = assignment.title;
+    String course = assignment.course;
+    DateTime? selectedDate = assignment.dueDate;
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              title: const Text('Edit Assignment'),
+
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      initialValue: assignment.title,
+                      decoration: const InputDecoration(
+                        labelText: 'Assignment title',
+                        prefixIcon: Icon(Icons.assignment_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        title = value;
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    TextFormField(
+                      initialValue: assignment.course,
+                      decoration: const InputDecoration(
+                        labelText: 'Course name',
+                        prefixIcon: Icon(Icons.school_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        course = value;
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        final pickedDate = await showDatePicker(
+                          context: dialogContext,
+                          initialDate: selectedDate ?? DateTime.now(),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2100),
+                        );
+
+                        if (pickedDate != null && dialogContext.mounted) {
+                          setDialogState(() {
+                            selectedDate = pickedDate;
+                          });
+                        }
+                      },
+                      icon: const Icon(Icons.calendar_month_outlined),
+                      label: Text(
+                        selectedDate == null
+                            ? 'Choose deadline'
+                            : '${selectedDate!.day.toString().padLeft(2, '0')}.'
+                                  '${selectedDate!.month.toString().padLeft(2, '0')}.'
+                                  '${selectedDate!.year}',
+                      ),
+                    ),
+
+                    if (selectedDate != null)
+                      TextButton.icon(
+                        onPressed: () {
+                          setDialogState(() {
+                            selectedDate = null;
+                          });
+                        },
+                        icon: const Icon(Icons.close),
+                        label: const Text('Remove date'),
+                      ),
+                  ],
+                ),
+              ),
+
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+
+                FilledButton(
+                  onPressed: () {
+                    if (title.trim().isEmpty || course.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please fill in all fields'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    bloc.add(
+                      EditAssignment(
+                        id: assignment.id,
+                        title: title.trim(),
+                        course: course.trim(),
+                        dueDate: selectedDate,
+                      ),
+                    );
+
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: const Text('Save Changes'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -277,16 +404,33 @@ class AssignmentsScreen extends StatelessWidget {
                       ],
                     ),
 
-                    trailing: IconButton(
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        color: AppColors.error,
-                      ),
-                      onPressed: () {
-                        context.read<AssignmentBloc>().add(
-                          DeleteAssignment(assignment.id),
-                        );
-                      },
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: 'Edit assignment',
+                          icon: const Icon(
+                            Icons.edit_outlined,
+                            color: AppColors.primary,
+                          ),
+                          onPressed: () {
+                            _showEditDialog(context, assignment);
+                          },
+                        ),
+
+                        IconButton(
+                          tooltip: 'Delete assignment',
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: AppColors.error,
+                          ),
+                          onPressed: () {
+                            context.read<AssignmentBloc>().add(
+                              DeleteAssignment(assignment.id),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 );

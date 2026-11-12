@@ -43,3 +43,20 @@ class DeleteAssignment extends AssignmentEvent {
   @override
   List<Object?> get props => [id];
 }
+
+class EditAssignment extends AssignmentEvent {
+  final String id;
+  final String title;
+  final String course;
+  final DateTime? dueDate;
+
+  const EditAssignment({
+    required this.id,
+    required this.title,
+    required this.course,
+    this.dueDate,
+  });
+
+  @override
+  List<Object?> get props => [id, title, course, dueDate];
+}

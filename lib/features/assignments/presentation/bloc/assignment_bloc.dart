@@ -14,6 +14,7 @@ class AssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
     on<AddAssignment>(_onAdd);
     on<ToggleAssignment>(_onToggle);
     on<DeleteAssignment>(_onDelete);
+    on<EditAssignment>(_onEdit);
   }
 
   final List<Assignment> _assignments = [];
@@ -108,6 +109,48 @@ class AssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
       emit(AssignmentLoaded(List.unmodifiable(_assignments)));
     } catch (e) {
       emit(AssignmentError('Failed to delete assignment: $e'));
+      emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+    }
+  }
+
+  // PUT - Edit assignment details
+  Future<void> _onEdit(
+    EditAssignment event,
+    Emitter<AssignmentState> emit,
+  ) async {
+    final title = event.title.trim();
+    final course = event.course.trim();
+
+    if (title.isEmpty || course.isEmpty) {
+      emit(const AssignmentError('Please fill in all fields'));
+      emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+      return;
+    }
+
+    final index = _assignments.indexWhere(
+      (assignment) => assignment.id == event.id,
+    );
+
+    if (index == -1) return;
+
+    final current = _assignments[index];
+
+    final updatedAssignment = Assignment(
+      id: current.id,
+      title: title,
+      course: course,
+      isCompleted: current.isCompleted,
+      dueDate: event.dueDate,
+    );
+
+    try {
+      final saved = await repository.updateAssignment(updatedAssignment);
+
+      _assignments[index] = saved;
+
+      emit(AssignmentLoaded(List.unmodifiable(_assignments)));
+    } catch (e) {
+      emit(AssignmentError('Failed to edit assignment: $e'));
       emit(AssignmentLoaded(List.unmodifiable(_assignments)));
     }
   }
