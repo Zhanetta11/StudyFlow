@@ -8,9 +8,70 @@ import '../../../assignments/presentation/bloc/assignment_state.dart';
 import '../../models/study_statistics.dart';
 import '../widgets/assignment_card.dart';
 import '../widgets/progress_card.dart';
+import '../../../assignments/data/models/assignment.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  String _formatDeadline(DateTime? dueDate) {
+    if (dueDate == null) {
+      return 'No deadline';
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final deadline = DateTime(dueDate.year, dueDate.month, dueDate.day);
+
+    final difference = deadline.difference(today).inDays;
+
+    if (difference < 0) {
+      return 'Overdue';
+    }
+
+    if (difference == 0) {
+      return 'Today';
+    }
+
+    if (difference == 1) {
+      return 'Tomorrow';
+    }
+
+    final day = deadline.day.toString().padLeft(2, '0');
+    final month = deadline.month.toString().padLeft(2, '0');
+
+    return '$day.$month.${deadline.year}';
+  }
+
+  bool _isOverdue(DateTime? dueDate) {
+    if (dueDate == null) return false;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final deadline = DateTime(dueDate.year, dueDate.month, dueDate.day);
+
+    return deadline.isBefore(today);
+  }
+
+  // Sort pending assignments by nearest deadline.
+  List<Assignment> _getUpcomingAssignments(List<Assignment> assignments) {
+    final pending = assignments
+        .where((assignment) => !assignment.isCompleted)
+        .toList();
+
+    pending.sort((a, b) {
+      if (a.dueDate == null && b.dueDate == null) {
+        return 0;
+      }
+
+      if (a.dueDate == null) return 1;
+      if (b.dueDate == null) return -1;
+
+      return a.dueDate!.compareTo(b.dueDate!);
+    });
+
+    return pending.take(3).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,10 +142,9 @@ class HomeScreen extends StatelessWidget {
               state.assignments,
             );
 
-            final pendingAssignments = state.assignments
-                .where((assignment) => !assignment.isCompleted)
-                .take(3)
-                .toList();
+            final pendingAssignments = _getUpcomingAssignments(
+              state.assignments,
+            );
 
             return RefreshIndicator(
               onRefresh: () async {
@@ -194,7 +254,8 @@ class HomeScreen extends StatelessWidget {
                         child: AssignmentCard(
                           title: assignment.title,
                           course: assignment.course,
-                          deadline: 'No deadline',
+                          deadline: _formatDeadline(assignment.dueDate),
+                          isOverdue: _isOverdue(assignment.dueDate),
                           icon: Icons.menu_book_rounded,
                           iconColor: AppColors.primary,
                         ),

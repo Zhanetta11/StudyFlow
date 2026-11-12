@@ -6,6 +6,7 @@ class AssignmentCard extends StatelessWidget {
   final String title;
   final String course;
   final String deadline;
+  final bool isOverdue;
   final IconData icon;
   final Color iconColor;
 
@@ -14,6 +15,7 @@ class AssignmentCard extends StatelessWidget {
     required this.title,
     required this.course,
     required this.deadline,
+    this.isOverdue = false,
     required this.icon,
     required this.iconColor,
   });
@@ -36,9 +38,14 @@ class AssignmentCard extends StatelessWidget {
               color: iconColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: iconColor),
+            child: Icon(
+              icon,
+              color: iconColor,
+            ),
           ),
+
           const SizedBox(width: 14),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,9 +59,13 @@ class AssignmentCard extends StatelessWidget {
                     fontSize: 14,
                   ),
                 ),
+
                 const SizedBox(height: 4),
+
                 Text(
                   course,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12,
@@ -63,13 +74,22 @@ class AssignmentCard extends StatelessWidget {
               ],
             ),
           ),
+
           const SizedBox(width: 8),
-          Text(
-            deadline,
-            style: const TextStyle(
-              color: AppColors.primary,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+
+          Flexible(
+            child: Text(
+              deadline,
+              maxLines: 2,
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: isOverdue
+                    ? AppColors.error
+                    : AppColors.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
